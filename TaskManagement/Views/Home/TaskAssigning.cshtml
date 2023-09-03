@@ -1,0 +1,99 @@
+﻿@model TaskManagement.Models.Task
+
+@{
+    ViewBag.Title = "Task Assigning";
+}
+
+
+
+<h2>Assign Task</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProjectId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.ProjectId, ViewBag.ProjectList as SelectList, "Select Project", htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.StartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.EndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.SelectedEmployees, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.ListBoxFor(model => model.SelectedEmployees, new List<SelectListItem>() { }, htmlAttributes: new { @class = "form-control", })
+
+                @Html.ValidationMessageFor(model => model.SelectedEmployees, "", new { @class = "text-danger" })
+
+                <div id="SelectedEmployees" class="form-text">Please press annd hold ctrl key while selecting multiple employees</div>
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add a task" class="btn btn-secondary m-2" />
+                @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary ms-5" })
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script type="text/javascript">
+        $('#ProjectId').on('change', function () {
+            var selectedValue = $(this).val();
+            $.ajax({
+                url: '@Url.Action("GetEmployeesList")',
+                type: 'GET',
+                data: { projectId: selectedValue },
+                success: function (data) {
+                    $("#SelectedEmployees").empty();
+                    var dropDown = '';
+                    for (var i = 0; i < data.length; i++) {
+                        dropDown += '<option value="' + data[i].EmployeeId + '">' + data[i].Name + '</option>';
+                    }
+                    $("#SelectedEmployees").html(dropDown);
+                }
+            });
+        });
+    </script>
+}
+
+

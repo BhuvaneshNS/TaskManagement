@@ -1,0 +1,80 @@
+﻿@model TaskManagement.Models.Task
+
+@{
+    ViewBag.Title = "Task View";
+}
+
+<h2>TaskView</h2>
+<div class="row">
+    <div class="col-7">
+        <div class="form-group">
+            @Html.LabelFor(model => model.ProjectId, "Filter By Project", htmlAttributes: new { @class = "control-label col-md-2" })
+            @Html.DropDownListFor(model => model.ProjectId, ViewBag.ProjectList as SelectList, "Select Project", htmlAttributes: new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="col-5">
+        @Html.ActionLink("Back", "Index", null, new { @class = "btn btn-secondary ms-5" })
+    </div>
+</div>
+
+
+
+<br />
+<div id="details">
+
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+         $('#ProjectId').on('change', function () {
+    var selectedValue = $(this).val();
+    $.ajax({
+        url: '@Url.Action("GetTasks")',
+        type: 'GET',
+        data: { projectId: selectedValue },
+        success: function (data) {
+            console.log(data);
+            $("#details").empty();
+            if (data.length) {
+                var taskDetails ='';
+                var employeeDetails = '';
+                for (var i = 0; i < data.length; i++) {
+                    if (i == 0) {
+                        taskDetails += `<h5 class="my-3">Project: ${data[i].Project.Name}</h5><br/>`;
+                    } else {
+                        taskDetails += data[i - 1].ProjectId != data[i].ProjectId ? `<h5 class="my-3">Project: ${data[i].Project.Name}</h5><br/>`:'';
+                    }
+                    for (var j = 0; j < data[i].Employees.length; j++) {
+                        employeeDetails += `<tr>
+                                                <td>${data[i].Employees[j].EmployeeId}</th>
+                                                <td>${data[i].Employees[j].Name}</th>
+                                           </tr>`;
+                    }
+
+                    taskDetails += `<p> Task Description: ${data[i].Description}</p>
+                                    <p> Task Start Date: ${data[i].StartDate}</p>
+                                    <p> Task End date: ${data[i].EndDate}</p>
+                                    <table class="table table-bordered border-dark border border-3 w-50">
+                                        <thead>
+                                            <tr>
+                                                <th>MID</th>
+                                                <th>Employee Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${employeeDetails}
+                                        </tbody>
+                                    </table><br/>`;
+                    employeeDetails = '';
+                }
+                $("#details").html(taskDetails);
+            } else {
+                $("#details").html('<h5 class="m-4"> Nothing to show here...!');
+            }
+        }
+    });
+});
+    </script>
+}
